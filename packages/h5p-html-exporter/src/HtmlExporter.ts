@@ -295,9 +295,8 @@ export default class HtmlExporter {
             return `/*!@license ${filename} by Joubel and other contributors, licensed under MIT license*/`;
         }
         if (library) {
-            let { author, license } = await this.libraryStorage.getLibrary(
-                library
-            );
+            let { author, license } =
+                await this.libraryStorage.getLibrary(library);
             if (!author || author === '') {
                 author = 'unknown';
             }
@@ -429,10 +428,14 @@ export default class HtmlExporter {
                     licenseText + text.replace(/<\/script>/g, '<\\/script>');
             })
         );
-        const scripts = model.scripts
+        const scripts: string[] = model.scripts
             .map((script) => texts[script])
             .concat(additionalScripts);
-        return uglifyJs.minify(scripts, { output: { comments: 'some' } }).code;
+
+        return uglifyJs.minify(scripts, {
+            output: { comments: 'some' },
+            module: false
+        }).code;
     }
 
     /**
@@ -596,9 +599,8 @@ export default class HtmlExporter {
         await Promise.all(
             libraries.map(async (library) => {
                 const ubername = LibraryName.toUberName(library);
-                const allLibraryFiles = await this.libraryStorage.listFiles(
-                    library
-                );
+                const allLibraryFiles =
+                    await this.libraryStorage.listFiles(library);
                 const unusedLibraryFiles = allLibraryFiles.filter(
                     (filename) => {
                         if (
@@ -634,17 +636,16 @@ export default class HtmlExporter {
                 );
                 await Promise.all(
                     unusedLibraryFiles.map(async (unusedFile) => {
-                        result[
-                            `${ubername}/${unusedFile}`
-                        ] = `data:${mimetypes.lookup(
-                            path.basename(unusedFile)
-                        )};base64,${await streamToString(
-                            await this.libraryStorage.getFileStream(
-                                library,
-                                unusedFile
-                            ),
-                            'base64'
-                        )}`;
+                        result[`${ubername}/${unusedFile}`] =
+                            `data:${mimetypes.lookup(
+                                path.basename(unusedFile)
+                            )};base64,${await streamToString(
+                                await this.libraryStorage.getFileStream(
+                                    library,
+                                    unusedFile
+                                ),
+                                'base64'
+                            )}`;
                     })
                 );
             })
