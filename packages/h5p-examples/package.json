@@ -20,6 +20,8 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "@aws-sdk/client-s3": "^3.740.0",
+        "@aws-sdk/s3-request-presigner": "^3.740.0",
         "@fortawesome/fontawesome-free": "^6.4.0",
         "@lumieducation/h5p-express": "^9.3.2",
         "@lumieducation/h5p-html-exporter": "^9.3.2",
@@ -31,6 +33,7 @@
         "cache-manager": "4.1.0",
         "cache-manager-redis-store": "2.0.0",
         "debug": "^4.3.4",
+        "decompress": "^4.2.1",
         "dotenv": "^16.0.3",
         "express": "4.21.2",
         "express-fileupload": "^1.4.0",
