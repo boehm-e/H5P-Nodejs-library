@@ -123,7 +123,29 @@ export default function (
                                 : undefined
                     }
                 );
-                res.send(h5pPage);
+                console.log("h5pPage", h5pPage)
+                let h5pPageWithResize = h5pPage.replace('<head>', `<head>
+<meta HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
+<meta HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
+<script>
+  function sendHeight() {
+    const height = document.querySelector('.h5p-content').scrollHeight;
+    window.parent.postMessage({ type: 'setHeight', height: height }, '*');
+  }
+  
+  window.addEventListener('load', function() {
+    if (document.readyState === 'complete') {
+      setTimeout(sendHeight, 1000);
+    } else {
+      window.addEventListener('load', () => setTimeout(sendHeight, 1000));
+    }
+    // setInterval(sendHeight, 5000);
+  });
+//   window.addEventListener('resize', sendHeight);
+</script>
+`);
+                res.send(h5pPageWithResize);
+                // res.send(h5pPage);
                 res.status(200).end();
             } catch (error) {
                 res.status(500).end(error.message);
@@ -180,7 +202,7 @@ export default function (
                                 : undefined
                     }
                 );
-                res.send(h5pPage);
+                // res.send(h5pPage);
                 res.status(200).end();
             } catch (error) {
                 res.status(500).end(error.message);
