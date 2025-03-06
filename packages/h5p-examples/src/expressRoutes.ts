@@ -42,7 +42,7 @@ const downloadContentFromS3 = async (s3ObjectName: string, contentId: string) =>
     const cleanupPromises = entries.map(entry => {
         const fullPath = `${extractPath}/${entry.name}`;
         if (entry.name !== 'h5p.json' && entry.name !== 'content.json') {
-            return entry.isDirectory() 
+            return entry.isDirectory()
                 ? fs.promises.rm(fullPath, { recursive: true })
                 : fs.promises.unlink(fullPath);
         }
@@ -123,29 +123,38 @@ export default function (
                                 : undefined
                     }
                 );
-                console.log("h5pPage", h5pPage)
                 let h5pPageWithResize = h5pPage.replace('<head>', `<head>
 <meta HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
 <meta HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script>
   function sendHeight() {
-    const height = document.querySelector('.h5p-content').scrollHeight;
-    window.parent.postMessage({ type: 'setHeight', height: height }, '*');
+    const h5pContent = document.querySelector('.h5p-content');
+    if (!h5pContent) return;
+    const height = h5pContent.offsetHeight || h5pContent.scrollHeight;
+    const width = h5pContent.offsetWidth || h5pContent.scrollWidth;
+    if (height > 0) {
+      window.parent.postMessage({ type: 'setHeight', height: height }, '*');
+      window.parent.postMessage({ type: 'setAspectRatio', ratio: width/height }, '*');
+    }
   }
   
   window.addEventListener('load', function() {
     if (document.readyState === 'complete') {
       setTimeout(sendHeight, 1000);
+      setTimeout(sendHeight, 2000); // Try again after 2 seconds
+      setTimeout(sendHeight, 5000); // And again after 5 seconds to ensure content is loaded
     } else {
-      window.addEventListener('load', () => setTimeout(sendHeight, 1000));
+      window.addEventListener('load', () => {
+        setTimeout(sendHeight, 1000);
+        setTimeout(sendHeight, 2000);
+        setTimeout(sendHeight, 5000);
+      });
     }
-    // setInterval(sendHeight, 5000);
   });
 //   window.addEventListener('resize', sendHeight);
 </script>
 `);
-                res.send(h5pPageWithResize);
-                // res.send(h5pPage);
+                res.send(h5pPageWithResize);                // res.send(h5pPage);
                 res.status(200).end();
             } catch (error) {
                 res.status(500).end(error.message);
