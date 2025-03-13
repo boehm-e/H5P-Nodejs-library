@@ -219,22 +219,38 @@ export default function (
         }
     );
 
-    router.get(
-        '/edit/:contentId',
-        async (req: IRequestWithLanguage & IRequestWithUser, res) => {
-            const page = await h5pEditor.render(
-                req.params.contentId,
-                languageOverride === 'auto'
-                    ? (req.language ?? 'en')
-                    : languageOverride,
-                req.user
-            );
-            res.send(page);
-            res.status(200).end();
+    // router.get(
+    //     '/edit/:contentId',
+    //     async (req: IRequestWithLanguage & IRequestWithUser, res) => {
+    //         const page = await h5pEditor.render(
+    //             req.params.contentId,
+    //             languageOverride === 'auto'
+    //                 ? (req.language ?? 'en')
+    //                 : languageOverride,
+    //             req.user
+    //         );
+    //         res.send(page);
+    //         res.status(200).end();
+    //     }
+    // );
+
+    const checkAdaH5pSecret = (req: IRequestWithUser, res: any): boolean => {
+        const ADA_H5P_SECRET = process.env.ADA_H5P_SECRET;
+        const requestSecret = req.body.ada_h5p_secret;
+
+        console.log("ada_h5p_secret", requestSecret)
+
+        if (!requestSecret || requestSecret !== ADA_H5P_SECRET) {
+            res.status(403).send('Forbidden').end();
+            return false;
         }
-    );
+        return true;
+    }
 
     router.post('/edit/:contentId', async (req: IRequestWithUser, res) => {
+        if (!checkAdaH5pSecret(req, res)) {
+            return;
+        }
         const contentId = await h5pEditor.saveOrUpdateContent(
             req.params.contentId.toString(),
             req.body.params.params,
@@ -247,22 +263,26 @@ export default function (
         res.status(200).end();
     });
 
-    router.get(
-        '/new',
-        async (req: IRequestWithLanguage & IRequestWithUser, res) => {
-            const page = await h5pEditor.render(
-                undefined,
-                languageOverride === 'auto'
-                    ? (req.language ?? 'en')
-                    : languageOverride,
-                req.user
-            );
-            res.send(page);
-            res.status(200).end();
-        }
-    );
+    // router.get(
+    //     '/new',
+    //     async (req: IRequestWithLanguage & IRequestWithUser, res) => {
+    //         const page = await h5pEditor.render(
+    //             undefined,
+    //             languageOverride === 'auto'
+    //                 ? (req.language ?? 'en')
+    //                 : languageOverride,
+    //             req.user
+    //         );
+    //         res.send(page);
+    //         res.status(200).end();
+    //     }
+    // );
 
     router.post('/new', async (req: IRequestWithUser, res) => {
+        if (!checkAdaH5pSecret(req, res)) {
+            return;
+        }
+
         if (
             !req.body.params ||
             !req.body.params.params ||
@@ -285,22 +305,22 @@ export default function (
         res.status(200).end();
     });
 
-    router.get('/delete/:contentId', async (req: IRequestWithUser, res) => {
-        try {
-            await h5pEditor.deleteContent(req.params.contentId, req.user);
-        } catch (error) {
-            res.send(
-                `Error deleting content with id ${req.params.contentId}: ${error.message}<br/><a href="javascript:window.location=document.referrer">Go Back</a>`
-            );
-            res.status(500).end();
-            return;
-        }
+    // router.get('/delete/:contentId', async (req: IRequestWithUser, res) => {
+    //     try {
+    //         await h5pEditor.deleteContent(req.params.contentId, req.user);
+    //     } catch (error) {
+    //         res.send(
+    //             `Error deleting content with id ${req.params.contentId}: ${error.message}<br/><a href="javascript:window.location=document.referrer">Go Back</a>`
+    //         );
+    //         res.status(500).end();
+    //         return;
+    //     }
 
-        res.send(
-            `Content ${req.params.contentId} successfully deleted.<br/><a href="javascript:window.location=document.referrer">Go Back</a>`
-        );
-        res.status(200).end();
-    });
+    //     res.send(
+    //         `Content ${req.params.contentId} successfully deleted.<br/><a href="javascript:window.location=document.referrer">Go Back</a>`
+    //     );
+    //     res.status(200).end();
+    // });
 
     return router;
 }

@@ -224,9 +224,9 @@ const start = async (): Promise<void> => {
         res.status(200).send(html);
     });
 
-    // The startPageRenderer displays a list of content objects and shows
-    // buttons to display, edit, delete and download existing content.
-    server.get('/', startPageRenderer(h5pEditor));
+    // // The startPageRenderer displays a list of content objects and shows
+    // // buttons to display, edit, delete and download existing content.
+    // server.get('/', startPageRenderer(h5pEditor));
 
     server.use('/client', express.static(path.join(__dirname, 'client')));
 
