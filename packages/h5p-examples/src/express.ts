@@ -26,6 +26,26 @@ import { displayIps, clearTempFiles } from './utils';
 
 let tmpDir: DirectoryResult;
 
+const LIBRARIES_TO_INSTALL = ['H5P.InteractiveVideo', 'H5P.QuestionSet'];
+
+async function installLibrary(id, user, h5pEditor) {
+    await h5pEditor.installLibraryFromHub(id, user);
+    return true;
+}
+
+async function setupLibraries(user, h5pEditor) {
+
+    for (const id of LIBRARIES_TO_INSTALL) {
+        try {
+            console.log(`Installing library: ${id}`);
+            await installLibrary(id, user, h5pEditor);
+            console.log(`Successfully installed: ${id}`);
+        } catch (error) {
+            console.error(`Failed to install ${id}:`, error);
+        }
+    }
+}
+
 const start = async (): Promise<void> => {
     const useTempUploads = process.env.TEMP_UPLOADS === 'true';
     if (useTempUploads) {
@@ -108,6 +128,9 @@ const start = async (): Promise<void> => {
         undefined,
         h5pEditor.contentUserDataStorage
     );
+
+    // ScienceInfuse: make sure default libraries are installed: 
+    await setupLibraries(new User(), h5pEditor);
 
     // We now set up the Express server in the usual fashion.
     const server = express();

@@ -219,20 +219,20 @@ export default function (
         }
     );
 
-    // router.get(
-    //     '/edit/:contentId',
-    //     async (req: IRequestWithLanguage & IRequestWithUser, res) => {
-    //         const page = await h5pEditor.render(
-    //             req.params.contentId,
-    //             languageOverride === 'auto'
-    //                 ? (req.language ?? 'en')
-    //                 : languageOverride,
-    //             req.user
-    //         );
-    //         res.send(page);
-    //         res.status(200).end();
-    //     }
-    // );
+    router.get(
+        '/edit/:contentId',
+        async (req: IRequestWithLanguage & IRequestWithUser, res) => {
+            const page = await h5pEditor.render(
+                req.params.contentId,
+                languageOverride === 'auto'
+                    ? (req.language ?? 'en')
+                    : languageOverride,
+                req.user
+            );
+            res.send(page);
+            res.status(200).end();
+        }
+    );
 
     const checkAdaH5pSecret = (req: IRequestWithUser, res: any): boolean => {
         const ADA_H5P_SECRET = process.env.ADA_H5P_SECRET;
